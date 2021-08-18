@@ -23,7 +23,7 @@ if not
 4.  
 Then download this repository.  
 Create a folder to download into. 
-ie. 
+ie.  
 "mkdir githubDownload"  
 cd into it  
 ie.  
