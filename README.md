@@ -1,4 +1,4 @@
-# Triphasic
+# Triphasic :heart:
 Triphasic Heart Pump Work - For Albert Chong.  
 This is an application that uses Python, Raspberry Pi, Stepper Motors, Sensors etc to create a specialised heart pump. Class Based.  
 Triphasic.py contains a Pump (closed loop stepper motor control) class, a Occluder (servo) class, and a sensor (PSI and Flow) class and basic CSV writer.  
