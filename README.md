@@ -38,4 +38,5 @@ type in
 Select Interface Options (3)  
 Then enable I2C   
 6.    
-Run Code   
+Run Code  
+"python3 TriphasicData_1.py"  
