@@ -36,7 +36,6 @@ Setup peripherals
 type in  
 "sudo raspi-config"  
 Select Interface Options (3)  
-Then enable I2C  
-  
-6.  
+Then enable I2C   
+6.    
 Run Code   
