@@ -39,4 +39,4 @@ Select Interface Options (3)
 Then enable I2C
 
 6.
-Run Code
+Run Code 
