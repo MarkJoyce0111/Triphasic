@@ -96,8 +96,7 @@ class TriphasicApp(tk.Tk, Pump):
                        "rate_value": 60, "peak_percentage_value": 50, "lock_on_start": True,
                        "remaining_degrees": 1, "occlusion": 0} 
         
-        if os.path.isfile(path):
-            #print ("File exist")     
+        if os.path.isfile(path):    
             f = open(path, "r")
             data = f.read()
             f.close()
@@ -136,7 +135,7 @@ class TriphasicApp(tk.Tk, Pump):
                            converted['occlusion'])
             
         
-                
+    # Save config File            
     def save_info_file(self, tube_diameter, pulse_per_revolution, length_per_revolution, systolic_percentage_value, stroke_volume_value, rate_value, peak_percentage_value, lock_on_start_value,remaining_degrees, occlusion):
         
         defaultDict = {"tube_diameter": tube_diameter, "pulse_per_revolution": pulse_per_revolution,
@@ -299,12 +298,15 @@ class CalPumpChamber(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.config(cursor='none')
+        
             
         # Value check for Stepper Conttroller valid pulse per rev
         def valuecheck(value):
             newvalue = min(self.valuelist, key=lambda x:abs(x-float(value)))
             pulse_per_revolution_slider.set(newvalue)
             
+            
+        # Save Config Values    
         def saveStuff():
             #Get Data
             controller.set_tube_diameter(tube_diameter_slider.get())
@@ -317,8 +319,6 @@ class CalPumpChamber(tk.Frame):
             controller.set_lock_on_start(var1.get())
             controller.set_remaining_degrees(remaining_degrees_slider.get())
             controller.set_occlusion(occlusion_slider.get())
-            
-         
             #Save Data
             controller.save_info_file(controller.get_tube_diameter(),
                                       controller.get_pulse_per_revolution(),
@@ -345,7 +345,7 @@ class CalPumpChamber(tk.Frame):
         self.peak_percentage_value = controller.get_peak_percentage_value()
         self.remaining_degrees_value = controller.get_remaining_degrees()
         self.occlusion_value = controller.get_occlusion()
-        
+        # Create/Set Tk String Vars
         self.tube_diameter = tk.StringVar()
         self.tube_diameter.set(self.tube_diameter_value)
         self.length_per_revolution = tk.StringVar()
@@ -522,9 +522,6 @@ class PumpOperation(tk.Frame):
         self.config(cursor='none')
         self.servo_gpio = 12 # PIN 32 = GPIO 12
               
-        # Create Pump Object
-        # pumpObject(direction_pin, return_sensor, motor_pin, length, pulse_per_revolution, length_per_revolution, tube_diameter, systolic_percentage_value, volume_value, rate_value, peak_percentage_value)
-
         color1 = 'white'
         color2 = 'gray'
         self.__patient = ""
@@ -533,7 +530,7 @@ class PumpOperation(tk.Frame):
         # Pressure sensor variables
         voltage_low_limit = 0.5 # Lowest valid voltage value @ 0 PSI
         voltage_high_limit = 4.5 # Highest valid voltage value @ 5 PSI
-        pressure_range = 5 # 5 PSI Max reading range.
+        pressure_range = 10 # 10 PSI Max reading range.
         voltage_reading = 0.0
         pressure = 0.0
         
@@ -545,14 +542,15 @@ class PumpOperation(tk.Frame):
         self.flow_xs = []
         self.flow_ys = []
         
-        
+        # Getters and Setters
+        #####################
         def get_patient():
             return self.__patient
         
         
         def set_patient(self, patient):
             self.__patient = patient
-            
+        ######################    
         
         #Remove/Delete Plot File
         def remove_foo():
@@ -564,6 +562,7 @@ class PumpOperation(tk.Frame):
             
             while os.path.isfile("foo.png") == True:
                 pass
+         
          
         #Required to create new arrays and PWM waves or will crash - non-existant Wave ID.     
         def initialise_pump_settings():
@@ -593,7 +592,6 @@ class PumpOperation(tk.Frame):
             occluder_slider.bind("<ButtonRelease-1>", change_detect)
             
             
-        
         #Disable sliders and spinboxes     
         def disable_controls():
             stroke_vol_spinbox['state'] = 'disabled'
@@ -601,7 +599,7 @@ class PumpOperation(tk.Frame):
             systolic_percentage_spinbox['state'] = 'disabled'
             systole_a_p_spinbox['state'] = 'disabled'
             occluder_spinbox['state'] = 'disabled'
-
+            
             stroke_vol_slider['state'] = 'disabled'
             heart_rate_slider['state'] = 'disabled'
             systolic_percent_slider['state'] = 'disabled'
@@ -612,100 +610,19 @@ class PumpOperation(tk.Frame):
             systolic_percent_slider.unbind("<ButtonRelease-1>")
             systole_a_p_slider.unbind("<ButtonRelease-1>")
             occluder_slider.unbind("<ButtonRelease-1>")
-        
-        
-        #Create plot image and open it. Enable Controls
-        def graph_pt1():
-            frequency_graph = []
-            frequency_graph = self.pump.up_frequency_copy
-            list_length = len(self.pump.down_frequency_copy)
             
-            for i in range(list_length):
-                frequency_graph.append((self.pump.down_frequency_copy[i] * -1))
-                
-            threading.Thread(name = "remove_foo", target = remove_foo).start()
-            plt.title(get_patient(), fontsize=20)
-            plt.xticks(rotation=45, ha='right')
-            plt.subplots_adjust(bottom=0.30)
-            plt.ylabel('')
-            plt.plot(frequency_graph)
-            plt.savefig('foo.png')
-            plt.clf()
             
-        
-        #Create plot image and open it. Do Not Enable Controls.       
-        def graph_it_no_enable():     
-            frequency_graph = []
-            frequency_graph = self.pump.up_frequency_copy
-            list_length = len(self.pump.down_frequency_copy)
-            
-            for i in range(list_length):
-                frequency_graph.append((self.pump.down_frequency_copy[i] * -1))
-            
-            threading.Thread(name = "remove_foo", target = remove_foo).start()
-            plt.title(get_patient(), fontsize=20)
-            plt.xticks(rotation=45, ha='right')
-            plt.subplots_adjust(bottom=0.30)
-            plt.ylabel('')
-            plt.plot(frequency_graph)
-            
-            try:
-                plt.savefig('foo.png')
-            except:
-                pass
-            
-            try:
-                image = Image.open("foo.png")
-                image = image.resize((260,220), Image.ANTIALIAS)
-                photo = ImageTk.PhotoImage(image)
-                plot_pwm_label.configure(image=photo)
-                plot_pwm_label.image = photo
-            except:
-                pass
-                
-            try:
-                plt.clf()
-            except:
-                pass
-        
-        #Wait for new run/plot data. Then Graph it.    
-        def plot_motor_run():     
-            #wait for new data
-            while self.pump.i_made_new_data == False:
-                time.sleep(0.1)
-                
-            first = multiprocessing.Process(target=graph_pt1, args=())
-            first.start()
-            first.join()
-            image = Image.open("foo.png")
-            image = image.resize((260,220), Image.ANTIALIAS)
-            photo = ImageTk.PhotoImage(image)
-            plot_pwm_label.configure(image=photo)
-            plot_pwm_label.image = photo
-            
-            enable_controls()
-        
         #Input Change - uses EVENT
         def change_detect(event):
             self.throttle_valve.set_angle(occluder_slider.get())
             if self.pump.running == True: 
-                #disable_controls()
                 set_up_pump_variables()
                 self.pump.i_made_new_data = False
                 self.pump.condition_change = 1
-                #threading.Thread(name='plot_motor_run_thread', target = plot_motor_run).start()
             else:  
                 disable_controls()
                 set_up_pump_variables()
                 initialise_pump_settings()
-#                 first = multiprocessing.Process(target=graph_pt1, args=())
-#                 first.start()
-#                 first.join()
-#                 image = Image.open("foo.png")
-#                 image = image.resize((260,220), Image.ANTIALIAS)
-#                 photo = ImageTk.PhotoImage(image)
-#                 plot_pwm_label.configure(image=photo)
-#                 plot_pwm_label.image = photo
                 enable_controls()
                 self.pump.condition_change = 1
             threading.Thread(name='States_thread', target=states).start()
@@ -716,28 +633,16 @@ class PumpOperation(tk.Frame):
             self.throttle_valve.set_angle(occluder_slider.get())
             running = self.pump.running
             if running == True:      
-                #disable_controls()
                 set_up_pump_variables()
                 self.pump.i_made_new_data = False
                 self.pump.condition_change = 1
-                #threading.Thread(name='dummy_thread', target = plot_motor_run).start()
             else:
-                #disable_controls()
                 set_up_pump_variables()
                 initialise_pump_settings()
-                first = multiprocessing.Process(target=graph_pt1, args=())
-#                 first.start()
-#                 first.join()
-#                 image = Image.open("foo.png")
-#                 image = image.resize((260,220), Image.ANTIALIAS)
-#                 photo = ImageTk.PhotoImage(image)
-#                 plot_pwm_label.configure(image=photo)
-#                 plot_pwm_label.image = photo
-                #enable_controls()
-                #enable_controls()
                 self.pump.condition_change = 1
                 
             threading.Thread(name='States_thread', target=states).start()
+            
             
         # THREAD - Handle Update Screen    
         def states():
@@ -763,6 +668,7 @@ class PumpOperation(tk.Frame):
                     break
                 
                 time.sleep(0.2)
+                
                
         #Start and stop the pump. Change button colours and disable/enable controls -sliders and spinboxes                    
         def start_stop_function():
@@ -787,8 +693,7 @@ class PumpOperation(tk.Frame):
                                   
             if self.pump.running == False:
                 status_bar['text'] = 'The pump is running at ' + str(self.pump.systolic_percentage_value) + ' percent of systolic, ' + str(self.pump.rate_value) + ' beat per minute, and ' + str(self.pump.volume_value) + ' percent occlusion'
-                #print('The pump is running at ' + str(self.pump.systolic_percentage_value) + ' percent of systolic, ' + str(self.pump.rate_value) + ' beat per minute, and ' + str(self.pump.volume_value) + ' percent occlusion')   
-            
+         
             threading.Thread(name='start_stop_states',target=start_stop_states).start()
             threading.Thread(name='States_thread', target=states).start()
             threading.Thread(name='Pump_start_stop_function', target=self.pump.start_stop_function).start()
@@ -816,14 +721,6 @@ class PumpOperation(tk.Frame):
             
             set_up_pump_variables()
             initialise_pump_settings()
-#             first = multiprocessing.Process(target=graph_pt1, args=())
-#             first.start()
-#             first.join()
-#             image = Image.open("foo.png")
-#             image = image.resize((260,220), Image.ANTIALIAS)
-#             photo = ImageTk.PhotoImage(image)
-#             plot_pwm_label.configure(image=photo)
-#             plot_pwm_label.image = photo
             enable_controls()
         
         
@@ -879,10 +776,10 @@ class PumpOperation(tk.Frame):
             finally:
                 controller.show_frame("MainMenu")
             
-            
+        # Gets Sensor Values, Resizes plot image, then displays it.   
         def draw_psi_plot():
             while(self.pump.running == True):
-                first = multiprocessing.Process(target=get_psi_values, args=())
+                first = multiprocessing.Process(target=aquire_sensor_values, args=()) # get sensor values
                 first.start()
                 first.join()
                 image = Image.open("foo2.png")
@@ -898,36 +795,13 @@ class PumpOperation(tk.Frame):
                 plot_flow_label.image = photo
                 
         #Read Sensor Values            
-        def get_psi_values():
-            # Sample pressure
-            for t in range(0, 200):
-                
-                # Read pressure from sensor
-                #
-                voltage_reading = self.psi_channel.voltage
-                pressure = pressure_range * (voltage_reading - voltage_low_limit) / (voltage_high_limit - voltage_low_limit)
-                #if(pressure < 0): 
-                    #pressure = 0.0
-
-                # Add x and y to lists
-                self.psi_xs.append(t)#(dt.datetime.now().strftime('%H:%M:%S.%f'))
-                self.psi_ys.append(pressure)
-                
-                #Read flow from sensor
-                voltage_reading = self.flow_channel.voltage
-                flow = pressure_range * (voltage_reading - voltage_low_limit) / (voltage_high_limit - voltage_low_limit)
-                #if(pressure < 0): 
-                    #pressure = 0.0
-                
-                self.flow_xs.append(t)#(dt.datetime.now().strftime('%H:%M:%S.%f'))
-                self.flow_ys.append(flow)
-
-                # Wait x second before sampling again
-                time.sleep(0.01)
-           
+        def aquire_sensor_values():
+            # Get PSI and FLow sensor values
+            self.psi_xs, self.psi_ys, self.flow_xs, self.flow_ys = self.sensors.get_sensor_values()           
+            # Graph PSI and Flow Values
             graph_psi_values()
-                
-                
+        
+        #Plot the results into images and save into a image file.      
         def graph_psi_values():
             #            
             # Draw plot PSI
@@ -970,15 +844,22 @@ class PumpOperation(tk.Frame):
                                      
     # --MAIN--
     
-        #ADC set up.
-        self.ads = ADS.ADS1115(i2c)
-        self.psi_channel = AnalogIn(self.ads, ADS.P0)
-        self.flow_channel = AnalogIn(self.ads, ADS.P1)
+        #Sensors Instance
+        self.sensors = PumpSensor()
+        #Servo Instance
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
+        #Pump instance
+        self.pump = Pump(17,27,5,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
+                         controller.get_tube_diameter(), controller.get_remaining_degrees())
         
+        #Set pump vars
+        self.pump.volume_value = controller.get_stroke_volume_value()
+        self.pump.rate_value = controller.get_rate_value()
+        self.pump.systolic_percentage_value = controller.get_systolic_percentage_value()
+        self.pump.peak_percentage_value = controller.get_peak_percentage_value()
+        self.occluder_angle_value = controller.get_occlusion()
         
-        
-        #self.fillerImage ="fry.jpeg"
+        #Defaut / Startup Plot Image - Blank
         self.fillerImage ="white.jpeg"
         
         #Fonts
@@ -1011,20 +892,6 @@ class PumpOperation(tk.Frame):
         
         exit_button = tk.Button(self, text = 'Exit', font = controller.allfont, bg = color1, height = 2)
                    
-        
-        #Pump instance
-        self.pump = Pump(17,27,5,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
-                         controller.get_tube_diameter(), controller.get_remaining_degrees())
-        
-        #Set pump vars
-        self.pump.volume_value = controller.get_stroke_volume_value()
-        self.pump.rate_value = controller.get_rate_value()
-        self.pump.systolic_percentage_value = controller.get_systolic_percentage_value()
-        self.pump.peak_percentage_value = controller.get_peak_percentage_value()
-        self.occluder_angle_value = controller.get_occlusion()
-        
-        
-        
         #Tk string vars
         self.stroke_volume = tk.StringVar()
         self.stroke_volume.set(self.pump.volume_value)
@@ -1038,12 +905,12 @@ class PumpOperation(tk.Frame):
         self.occluder_angle.set(self.occluder_angle_value)
         print("occluder_angle: ",self.occluder_angle_value)
 
-        
         #Tk set string vars
         stroke_vol_slider['variable'] = self.stroke_volume
         heart_rate_slider['variable'] = self.heart_rate
         systolic_percent_slider['variable'] = self.pulse_percentage
         
+        # Setup utton Commands
         start_stop_button['command'] = start_stop_function
         customise_button['command'] = function_c
         return_initial['command'] = return_initial_function
@@ -1054,7 +921,6 @@ class PumpOperation(tk.Frame):
         stroke_vol_spinbox = tk.Spinbox(self, command = change_detect_no_event, from_ = 1, to = 98, width = 2, bg = 'orange',
                                         textvariable = self.stroke_volume, justify = 'right', font = self.spinner_font)
         stroke_vol_spinbox['state'] = 'disabled'
-        #stroke_vol_spinbox.bind("<ButtonPress-1>", change_detect)
         stroke_vol_slider.bind("<ButtonRelease-1>", change_detect)
         
         heart_rate_label = tk.Label(self, text = 'Heart rate', font = controller.allfont, bg = 'pink')
@@ -1062,7 +928,6 @@ class PumpOperation(tk.Frame):
                                         bg = 'pink', textvariable = self.heart_rate, justify = 'right',
                                         font = self.spinner_font)
         heart_rate_spinbox['state'] = 'disabled'
-        #heart_rate_spinbox.bind("<ButtonRelease-1>", change_detect)
         heart_rate_slider.bind("<ButtonRelease-1>", change_detect)
         
         systolic_percentage_label = tk.Label(self, text = 'Systolic percentage', font = controller.allfont, bg = 'skyblue1')
@@ -1070,7 +935,6 @@ class PumpOperation(tk.Frame):
                                                  width = 2, increment = 10, bg = 'skyblue1', textvariable = self.pulse_percentage,
                                                  justify = 'right',font = self.spinner_font)
         systolic_percentage_spinbox['state'] = 'disabled'
-        #systolic_percentage_spinbox.bind("<ButtonRelease-1>", change_detect)
         systolic_percent_slider.bind("<ButtonRelease-1>", change_detect)
         
         systole_a_p_label = tk.Label(self, text = 'Systole AP', font = controller.allfont, bg = 'yellow')
@@ -1078,20 +942,15 @@ class PumpOperation(tk.Frame):
                                          bg = 'yellow', textvariable = self.peak_percentage, justify = 'right',
                                          font = self.spinner_font)
         systole_a_p_spinbox['state'] = 'disabled'
-        #systole_a_p_spinbox.bind("<ButtonRelease-1>", change_detect)
         systole_a_p_slider = tk.Scale(self, from_ = 80, to = 20, showvalue = 0, resolution = 10,
                                       bg = 'yellow', variable = self.peak_percentage, length = 200, sliderlength = 60, width = 20)
         systole_a_p_slider.bind("<ButtonRelease-1>", change_detect)
-        
-        
-        
         
         occluder_label = tk.Label(self, text = 'Occlusion', font = controller.allfont, bg = 'MediumOrchid2')
         occluder_spinbox = tk.Spinbox(self, command = change_detect_no_event,from_ = 0, to = 180, width = 2, increment = 1,
                                          bg = 'MediumOrchid2', textvariable = self.occluder_angle, justify = 'right',
                                          font = self.spinner_font)
         occluder_spinbox['state'] = 'disabled'
-        #systole_a_p_spinbox.bind("<ButtonRelease-1>", change_detect)
         occluder_slider = tk.Scale(self, from_ = 180, to = 0, showvalue = 0, resolution = 1,
                                       bg = 'MediumOrchid2', variable = self.occluder_angle, length = 200, sliderlength = 60, width = 20)
         occluder_slider.bind("<ButtonRelease-1>", change_detect)
@@ -1169,7 +1028,7 @@ class PumpOperation(tk.Frame):
         r = multiprocessing.Process(target=occluder_to_position, args=())
         r.start()
       
-        #threading.Thread(name="graphIt_thread_no_enable", target=graph_it_no_enable).start()
+        
 
 ##############################################################################################
         #####################################################################
@@ -1755,3 +1614,5 @@ class AutomateTests(tk.Frame):
 if __name__ == "__main__":
     app = TriphasicApp()
     app.mainloop()
+
+
