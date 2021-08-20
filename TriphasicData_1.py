@@ -782,6 +782,7 @@ class PumpOperation(tk.Frame):
                 first = multiprocessing.Process(target=aquire_sensor_values, args=()) # get sensor values
                 first.start()
                 first.join()
+                
                 image = Image.open("foo2.png")
                 image = image.resize((260,220), Image.ANTIALIAS)
                 photo = ImageTk.PhotoImage(image)
@@ -805,9 +806,10 @@ class PumpOperation(tk.Frame):
         def graph_psi_values():
             #            
             # Draw plot PSI
+            plt.axis([0, 200, 0, self.maxPSI])
             plt.xticks(rotation=45, ha='right')
             #plt.subplots_adjust(bottom=0.30)
-            plt.title('5 PSI pressure sensor', fontsize=18)
+            plt.title(str(self.maxPSI) + ' PSI pressure sensor', fontsize=18)
             plt.ylabel('PSI', fontsize=13)
             plt.plot(self.psi_xs, self.psi_ys)
             plt.tick_params(labelsize=11,labelcolor="red")
@@ -820,9 +822,10 @@ class PumpOperation(tk.Frame):
             self.psi_xs.clear()
             ##############################################################
             # Draw plot FLOW
+            plt.axis([0, 200, 0, 5])
             plt.xticks(rotation=45, ha='right')
             #plt.subplots_adjust(bottom=0.30)
-            plt.title('Flow Rate', fontsize=18)
+            plt.title('Flow Rate (volts)', fontsize=18)
             plt.ylabel('Flow', fontsize=13)
             plt.plot(self.flow_xs, self.flow_ys)
             plt.tick_params(labelsize=11,labelcolor="red")
@@ -1446,7 +1449,7 @@ class AutomateTests(tk.Frame):
             self.csv_writer.create_csv_file_and_header(self.dataFilename)
             
             #Create Sensor Instances
-            self.maxPSI - 10
+            self.maxPSI = 10
             self.sensors = PumpSensor(self.maxPSI)
             
             #GO! >>---->
@@ -1616,4 +1619,3 @@ class AutomateTests(tk.Frame):
 if __name__ == "__main__":
     app = TriphasicApp()
     app.mainloop()
-
