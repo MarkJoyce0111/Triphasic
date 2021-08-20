@@ -1616,4 +1616,4 @@ class AutomateTests(tk.Frame):
 if __name__ == "__main__":
     app = TriphasicApp()
     app.mainloop()
-      
+
