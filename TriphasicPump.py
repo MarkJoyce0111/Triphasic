@@ -500,7 +500,7 @@ class CsvWriter:
 ##############################################################################
 
 class PumpSensor:
-    def __init__(self):
+    def __init__(self, PSI_MAX):
         self.ads = ADS.ADS1115(i2c)
         self.psi_channel = AnalogIn(self.ads, ADS.P0)
         self.flow_channel = AnalogIn(self.ads, ADS.P1)
@@ -511,7 +511,7 @@ class PumpSensor:
         # Pressure sensor variables - Magic Numbers
         self.voltage_low_limit = 0.5 # Lowest valid voltage value @ 0 PSI
         self.voltage_high_limit = 4.5 # Highest valid voltage value @ 5 PSI
-        self.pressure_range = 5 # 5 PSI Max reading range. <---<< MAX PSI
+        self.pressure_range = PSI_MAX # Max PSI reading range. <---<< MAX PSI
         self.voltage_reading = 0.0
         self.pressure = 0.0
         
@@ -536,14 +536,11 @@ class PumpSensor:
             #Read flow from sensor <- CHANGE THE FORMULA
             self.voltage_reading = self.flow_channel.voltage
             self.flow = self.voltage_reading #self.pressure_range * (self.voltage_reading - self.voltage_low_limit) / (self.voltage_high_limit - self.voltage_low_limit)
-#             if(self.flow < 0): 
-#                 self.flow = 0.0
+            if(self.flow < 0):
+                self.flow = 0.0
             # Append Flow Values to x and y lists
             self.flow_xs.append(t)#(dt.datetime.now().strftime('%H:%M:%S.%f'))
             self.flow_ys.append(self.flow)
-            
-            # Read Throttle Valve <- TODO
-            #
             
             # Wait n (sub)seconds before sampling again
             time.sleep(0.01)
@@ -606,5 +603,5 @@ class Occluder:
         self.pi.set_servo_pulsewidth(self.servo_gpio, pulse_width) #set servo duty
    
 ## End Occluder Class ##  
-#######################################################################    
+#######################################################################        
     
