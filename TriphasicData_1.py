@@ -845,7 +845,8 @@ class PumpOperation(tk.Frame):
     # --MAIN--
     
         #Sensors Instance
-        self.sensors = PumpSensor()
+        self.maxPSI = 10
+        self.sensors = PumpSensor(self.maxPSI)
         #Servo Instance
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
         #Pump instance
@@ -1444,8 +1445,9 @@ class AutomateTests(tk.Frame):
             self.dataFilename = 'testdata' + datetime.now().strftime('%H%M%S%f%d%m%Y') + '.csv'
             self.csv_writer.create_csv_file_and_header(self.dataFilename)
             
-            #Create Sensor Reader Instance
-            self.sensors = PumpSensor()
+            #Create Sensor Instances
+            self.maxPSI - 10
+            self.sensors = PumpSensor(self.maxPSI)
             
             #GO! >>---->
             #Get values from controller class
@@ -1614,5 +1616,4 @@ class AutomateTests(tk.Frame):
 if __name__ == "__main__":
     app = TriphasicApp()
     app.mainloop()
-
-
+      
