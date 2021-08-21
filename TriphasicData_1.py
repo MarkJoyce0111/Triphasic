@@ -806,7 +806,7 @@ class PumpOperation(tk.Frame):
         def graph_psi_values():
             #            
             # Draw plot PSI
-            plt.axis([0, 200, 0, 6)
+            plt.axis([0, 200, 0, 6])
             plt.xticks(rotation=45, ha='right')
             #plt.subplots_adjust(bottom=0.30)
             plt.title(str(self.maxPSI) + ' PSI pressure sensor', fontsize=18)
