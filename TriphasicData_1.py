@@ -93,7 +93,7 @@ class TriphasicApp(tk.Tk, Pump):
         
         defaultDict = {"tube_diameter": 25, "pulse_per_revolution": 5000,"length_per_revolution": 3,
                        "systolic_percentage_value": 50, "stroke_volume_value": 6,
-                       "rate_value": 60, "peak_percentage_value": 50, "lock_on_start": True,
+                       "rate_value": 60, "peak_percentage_value": 50, "lock_on_start": False,
                        "remaining_degrees": 1, "occlusion": 0} 
         
         if os.path.isfile(path):    
