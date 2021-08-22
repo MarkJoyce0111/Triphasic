@@ -113,10 +113,10 @@ class Pump:
         print("Pump instance died :(")
         
     def enable_stepper(self):
-        pigpio.write(self.enable, 0)
+        self.pi.write(self.enable, 0)
         
-    def deiable_stepper(self):
-        pigpio.write(self.enable, 1)
+    def disable_stepper(self):
+        self.pi.write(self.enable, 1)
         
     def set_inputs(self,volume_value, systolic_percentage_value, rate_value, peak_percentage_value):
         
