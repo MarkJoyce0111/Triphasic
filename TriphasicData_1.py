@@ -747,6 +747,7 @@ class PumpOperation(tk.Frame):
                 self.pump.return_initial_function()
             else:
                 self.pump.return_initial_function()
+                self.pump.enable_stepper()
                 status_bar['text'] = 'Move to Initial position'
                 threading.Thread(name='Move_init_posi', target=move_initial_funct_done_check).start()
                 
@@ -1031,7 +1032,7 @@ class PumpOperation(tk.Frame):
             
         r = multiprocessing.Process(target=occluder_to_position, args=())
         r.start()
-      
+        self.pump.disable_stepper()
         
 
 ##############################################################################################
