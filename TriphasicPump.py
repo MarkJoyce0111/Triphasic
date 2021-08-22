@@ -33,7 +33,7 @@ import logging
 ##############################################################################
 class Pump:
     
-    def __init__(self, direction_pin, return_sensor, motor_pin, length, pulse_per_revolution, length_per_revolution, tube_diameter, remaining_degrees):
+    def __init__(self, direction_pin, return_sensor, motor_pin, enable_pin, length, pulse_per_revolution, length_per_revolution, tube_diameter, remaining_degrees):
         self.logging = logging
         self.logging.basicConfig(filename="PumpErrorLog.log",  level=logging.INFO)
         self.logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -43,6 +43,7 @@ class Pump:
         self.direction_pin = direction_pin
         self.return_sensor = return_sensor
         self.motor = motor_pin
+        self.enable = enable_pin
         self.length = length
         self.pulse_per_revolution = pulse_per_revolution
         self.length_per_revolution = length_per_revolution #3 #in millimeter, was 20
