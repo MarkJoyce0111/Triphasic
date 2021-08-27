@@ -1060,15 +1060,18 @@ class RunTests(tk.Frame):
         self.systolic_percentage_max = controller.get_systolic_percentage_value()
         self.peak_percentage_value_max = controller.get_peak_percentage_value()
         self.remaining_degrees_value_max = controller.get_remaining_degrees()
-        self.occlusion_value = controller.get_occlusion()
-        print(self.occlusion_value)
+        self.occlusion_value_to = controller.get_occlusion()
+        self.occlusion_value_from = controller.get_occlusion()
+        
         
         self.tube_diameter = tk.StringVar()
         self.tube_diameter.set(self.tube_diameter_value)
         self.length_per_revolution = tk.StringVar()
         self.length_per_revolution.set(self.length_per_revolution_value)
-        self.occlusion = tk.StringVar()
-        self.occlusion.set(self.occlusion_value)
+        self.occlusion_to = tk.StringVar()
+        self.occlusion_to.set(self.occlusion_value_to)
+        self.occlusion_from = tk.StringVar()
+        self.occlusion_from.set(self.occlusion_value_from)
         
         #MIN
         self.stroke_volume_MIN = tk.StringVar()
@@ -1107,10 +1110,14 @@ class RunTests(tk.Frame):
             test_dict['heart_rate_MAX'] = heart_rate_slider_MAX.get()
             test_dict['systolic_percentage_MAX'] = systolic_percentage_slider_MAX.get()
             test_dict['peak_percentage_MAX'] = peak_percentage_slider_MAX.get()
-            test_dict['occlusion'] = occlusion_slider.get()
+            test_dict['occlusion_from'] = occlusion_slider_from.get()
+            test_dict['occlusion_to'] = occlusion_slider_to.get()
             
-            #Input error check - 'from and 'to' values.
-            if test_dict['stroke_volume_MIN'] > test_dict['stroke_volume_MAX']:
+            #Input error check - 'from and 'to' values.'
+            if test_dict['occlusion_from'] > test_dict['occlusion_to']:
+                title_label['text'] = "Occlusion Value Min must be Less Than Occlusion Value Max"
+                title_label['fg'] = 'red'
+            elif test_dict['stroke_volume_MIN'] > test_dict['stroke_volume_MAX']:
                 title_label['text'] = "Stroke Volume Min must be Less Than Stroke Volume Max"
                 title_label['fg'] = 'red'
             elif test_dict['heart_rate_MIN'] > test_dict['heart_rate_MAX']:
@@ -1163,16 +1170,32 @@ class RunTests(tk.Frame):
         length_per_revolution_slider.grid(row = 3, column = 1, rowspan = 1, columnspan = 1, sticky = 'nesw')
         length_per_revolution_slider.set(self.length_per_revolution_value)
         
-        occlusion_label = tk.Label(self, text = 'Occlusion °', font = self.label_font, bg = 'MediumOrchid2')
-        occlusion_label.grid(row = 1, column = 2, columnspan = 1, sticky = 'nesw')
-        occlusion_spinbox = tk.Spinbox(self, from_ = 0, to = 180, width = 5, bg = 'MediumOrchid2',
-                                                    textvariable = self.occlusion, justify = 'right',
+        occlusion_label_from = tk.Label(self, text = 'Occlusion ° From', font = self.label_font, bg = 'MediumOrchid2')
+        occlusion_label_from.grid(row = 1, column = 2, columnspan = 1, sticky = 'nesw')
+        occlusion_spinbox_from = tk.Spinbox(self, from_ = 0, to = 180, width = 5, bg = 'MediumOrchid2',
+                                                    textvariable = self.occlusion_from, justify = 'right',
                                                     font=self.spinner_font)
-        occlusion_spinbox.grid(row = 2, column = 2, rowspan = 1, sticky = 'nesw')
-        occlusion_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
-                                                 length = 150, variable = self.occlusion, sliderlength = 60, width = 60)
-        occlusion_slider.grid(row = 3, column = 2, rowspan = 1, columnspan = 1, sticky = 'nesw')
-        occlusion_slider.set(self.occlusion_value)
+        occlusion_spinbox_from.grid(row = 2, column = 2, rowspan = 1, sticky = 'nesw')
+        occlusion_slider_from = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
+                                                 length = 150, variable = self.occlusion_from, sliderlength = 60, width = 60)
+        occlusion_slider_from.grid(row = 3, column = 2, rowspan = 1, columnspan = 1, sticky = 'nesw')
+        occlusion_slider_from.set(self.occlusion_value_from)
+        
+        
+        occlusion_label_to = tk.Label(self, text = 'Occlusion ° To', font = self.label_font, bg = 'MediumOrchid2')
+        occlusion_label_to.grid(row = 1, column = 3, columnspan = 1, sticky = 'nesw')
+        occlusion_spinbox_to = tk.Spinbox(self, from_ = 0, to = 180, width = 5, bg = 'MediumOrchid2',
+                                                    textvariable = self.occlusion_to, justify = 'right',
+                                                    font=self.spinner_font)
+        occlusion_spinbox_to.grid(row = 2, column = 3, rowspan = 1, sticky = 'nesw')
+        occlusion_slider_to = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
+                                                 length = 150, variable = self.occlusion_to, sliderlength = 60, width = 60)
+        occlusion_slider_to.grid(row = 3, column = 3, rowspan = 1, columnspan = 1, sticky = 'nesw')
+        occlusion_slider_to.set(self.occlusion_value_to)
+        
+        
+        
+        
         
         
         minimum_value_label = tk.Label(self, text="Minimum test values - From", font=self.controller.title_font)
@@ -1307,11 +1330,11 @@ class RunTests(tk.Frame):
         exit_button = tk.Button(self, text="Exit",
                            command=lambda: controller.show_frame("MainMenu"),
                            bg= 'green')
-        exit_button.grid(row = 3, column = 3, columnspan = 1, sticky = 'nesw')
+        exit_button.grid(row = 20, column = 0, columnspan = 1, sticky = 'nesw')
         
         run_tests_button = tk.Button(self, text="Run Tests",
                            command=run_tests,bg= 'red')
-        run_tests_button.grid(row = 2, column = 3, columnspan = 1, sticky = 'nesw')
+        run_tests_button.grid(row = 20, column = 1, columnspan = 1, sticky = 'nesw')
         
         
 class AutomateTests(tk.Frame):
@@ -1326,6 +1349,7 @@ class AutomateTests(tk.Frame):
         self.heart_rate = 0
         self.systolic_percentage = 0
         self.peak_percentage = 0
+        self.throttle_val = 0
 
         self.psi_xs = []
         self.psi_ys = []
@@ -1414,7 +1438,7 @@ class AutomateTests(tk.Frame):
         #Write data into CSV
         def collect_data():
             self.psi_xs, self.psi_ys, self.flow_xs, self.flow_ys = self.sensors.get_sensor_values()
-            self.throttle_valve_setting = controller.get_occlusion()
+            #self.throttle_valve_setting = controller.get_occlusion()
             #print(self.psi_ys)
   #add_data_to_csv(self, fileName, Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, )
             for result in range(len(self.psi_xs)):
@@ -1429,7 +1453,7 @@ class AutomateTests(tk.Frame):
                                                 self.psi_xs[result],
                                                 self.psi_ys[result],
                                                 self.flow_ys[result],
-                                                self.throttle_valve_setting)
+                                                self.throttle_val)
             
         
         def process1():   
@@ -1441,7 +1465,7 @@ class AutomateTests(tk.Frame):
                              self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees())
             #Create Servo Instance
             self.throttle_valve = Occluder(self.servo_gpio,600,2300)
-            self.throttle_valve.set_angle(self.controller.test_settings['occlusion'])
+            self.throttle_valve.set_angle(self.controller.test_settings['occlusion_from'])
             
             #CSV Writer Instance
             self.csv_writer = CsvWriter()
@@ -1463,13 +1487,15 @@ class AutomateTests(tk.Frame):
             self.heart_rate_max = self.controller.test_settings['heart_rate_MAX']
             self.systolic_percentage_max  = self.controller.test_settings['systolic_percentage_MAX']
             self.peak_percentage_max  = self.controller.test_settings['peak_percentage_MAX']
-            
+            self.throttle_valve_min = self.controller.test_settings['occlusion_from']
+            self.throttle_valve_max = self.controller.test_settings['occlusion_to']
             #Total tests vars
+            self.throttleValveNums = (self.controller.test_settings['occlusion_to'] - self.controller.test_settings['occlusion_from']) + 1
             self.strokeVolNums = (self.controller.test_settings['stroke_volume_MAX'] - self.controller.test_settings['stroke_volume_MIN']) + 1
             self.hearRateNums = (self.controller.test_settings['heart_rate_MAX'] - self.controller.test_settings['heart_rate_MIN']) + 1
             self.sytoleNums = ((self.controller.test_settings['systolic_percentage_MAX'] - self.controller.test_settings['systolic_percentage_MIN']) / 10) + 1 
-            self.peakNums = ((self.controller.test_settings['peak_percentage_MAX'] - self.controller.test_settings['peak_percentage_MIN']) / 10) + 1
-            self.total_tests = self.strokeVolNums * self.hearRateNums * self.sytoleNums * self.peakNums
+            self.peakNums = ((self.controller.test_settings['peak_percentage_MAX'] - self.controller.test_settings['peak_percentage_MIN']) / 10) + 1     
+            self.total_tests = self.throttleValveNums * self.strokeVolNums * self.hearRateNums * self.sytoleNums * self.peakNums
             
             #Set up pump                
             self.test_pump.volume_value = self.stroke_volume_min
@@ -1488,38 +1514,43 @@ class AutomateTests(tk.Frame):
             #Start Pump - Thread!
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
             #Loop through test values
-            for i in range(self.stroke_volume_min, self.stroke_volume_max + 1):
-                feed_back_label['text'] = "Running Tests"                
-                current_stroke_volume_label['text'] = str(i)
-                current_stroke_volume_label.config(text = str(i))
-                self.test_pump.volume_value = i
-                #time.sleep(0.5)
-                  
-                for j in range(self.heart_rate_min , self.heart_rate_max + 1):
-                    current_heart_rate_label['text'] = str(j)
-                    current_heart_rate_label.config(text = str(j))
-                    self.test_pump.rate_value = j
+            for h in range(self.throttle_valve_min, self.throttle_valve_max + 1):
+                self.throttle_valve.set_angle(h)
+                self.throttle_val = h
+                current_throttle_value_label['text'] = str(h)
+                
+                for i in range(self.stroke_volume_min, self.stroke_volume_max + 1):
+                    feed_back_label['text'] = "Running Tests"                
+                    current_stroke_volume_label['text'] = str(i)
+                    current_stroke_volume_label.config(text = str(i))
+                    self.test_pump.volume_value = i
                     #time.sleep(0.5)
-                    
-                    for k in range(self.systolic_percentage_min, self.systolic_percentage_max + 10, 10):
-                        current_systolic_percentage_label['text'] = str(k)
-                        current_systolic_percentage_label.config(text = str(k))
-                        self.test_pump.systolic_percentage_value = k
+                      
+                    for j in range(self.heart_rate_min , self.heart_rate_max + 1):
+                        current_heart_rate_label['text'] = str(j)
+                        current_heart_rate_label.config(text = str(j))
+                        self.test_pump.rate_value = j
                         #time.sleep(0.5)
                         
-                        for m in range(self.peak_percentage_min, self.peak_percentage_max + 10, 10):
-                            current_peak_percentage_label['text'] = str(m)
-                            current_peak_percentage_label.config(text = str(m))
-                            self.test_pump.peak_percentage_value = m
-                            #Tell pump to change settings
-                            self.test_pump.condition_change = 1
-                            #Wait for pump to finish new settings computations.
-                            self.test_pump.i_made_new_data = False
-                            while self.test_pump.i_made_new_data == False: #Wait for pump to finish computations
-                                time.sleep(0.01) #Save porcessing power
-                            #Then get sensor data
-                            threading.Thread(target=get_sensor_data).start()  #Get sensor data  
-                            time.sleep(3) #ZzzzzZ
+                        for k in range(self.systolic_percentage_min, self.systolic_percentage_max + 10, 10):
+                            current_systolic_percentage_label['text'] = str(k)
+                            current_systolic_percentage_label.config(text = str(k))
+                            self.test_pump.systolic_percentage_value = k
+                            #time.sleep(0.5)
+                            
+                            for m in range(self.peak_percentage_min, self.peak_percentage_max + 10, 10):
+                                current_peak_percentage_label['text'] = str(m)
+                                current_peak_percentage_label.config(text = str(m))
+                                self.test_pump.peak_percentage_value = m
+                                #Tell pump to change settings
+                                self.test_pump.condition_change = 1
+                                #Wait for pump to finish new settings computations.
+                                self.test_pump.i_made_new_data = False
+                                while self.test_pump.i_made_new_data == False: #Wait for pump to finish computations
+                                    time.sleep(0.01) #Save porcessing power
+                                #Then get sensor data
+                                threading.Thread(target=get_sensor_data).start()  #Get sensor data  
+                                time.sleep(3) #ZzzzzZ
                        
             #Tests Complete: Stop Pump, Reset GUI.               
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
@@ -1541,23 +1572,29 @@ class AutomateTests(tk.Frame):
         
         #Lay out variables
         self.title_row = 0
-        self.variable_name_row = 1
-        self.variable_value_row = 2
-        self.sep1_row = 3
-        self.status_title = 4
-        self.sep2_row = 5
-        self.info_bar_row = 6
-        self.test_number_row = 6
-        self.remaining_test_row = 7
-        self.remaining_time_row = 8
-        self.process_button_row = 9
-        self.exit_button_row = 10
-        self.abort_button_row = 11
+        self.variable_name_row = 3
+        self.variable_value_row = 4
+        self.sep1_row = 5
+        self.status_title = 6
+        self.sep2_row = 7
+        self.info_bar_row = 8
+        self.test_number_row = 8
+        self.remaining_test_row = 9
+        self.remaining_time_row = 10
+        self.process_button_row = 14
+        self.exit_button_row = 15
+        self.abort_button_row = 16
         
         #GUI
         label = tk.Label(self, text="Testing", font=self.title_font, fg = 'green')
         label.grid(row = self.title_row, column = 0, columnspan = 8, sticky = 'ew')
         
+        throttle_value_label = tk.Label(self, text = 'Throttle Value', font = self.label_font, bg = 'MediumOrchid2')
+        throttle_value_label.grid(row = 1, column = 0, columnspan = 2, sticky = 'ew')
+        
+        current_throttle_value_label = tk.Label(self, text = 0, font = self.label_font, bg = 'MediumOrchid2')
+        current_throttle_value_label.grid(row = 2, column = 0, columnspan = 2, sticky = 'ew')
+
         stroke_volume_label = tk.Label(self, text = '  Stroke Volume  ', font = self.label_font, bg = 'orange')
         stroke_volume_label.grid(row = self.variable_name_row, column = 0, columnspan = 2, sticky = 'ew')
         
@@ -1613,8 +1650,8 @@ class AutomateTests(tk.Frame):
         sep1 = ttk.Separator(self).grid(row=13, column=0, columnspan=8,sticky=('ew'))
         status_label = tk.Label(self, text="Status", font=self.data_font, fg = 'green')
         status_label.grid(row = self.status_title, column = 0, columnspan = 4, sticky = 'w')
-        sep2 = ttk.Separator(self).grid(row=self.sep2_row, column=0, columnspan=8,sticky=('ew'))
-        sep3 = ttk.Separator(self,orient='vertical').grid(row=5, column=2, rowspan=10,sticky=('ns'))
+        sep2 = ttk.Separator(self).grid(row=self.sep2_row, column=0, columnspan=10,sticky=('ew'))
+        sep3 = ttk.Separator(self,orient='vertical').grid(row=5, column=2, rowspan=15,sticky=('ns'))
         
 
 if __name__ == "__main__":
