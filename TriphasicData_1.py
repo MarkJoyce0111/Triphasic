@@ -297,7 +297,7 @@ class CalPumpChamber(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.config(cursor='none')
+        #self.config(cursor='none')
         
             
         # Value check for Stepper Conttroller valid pulse per rev
@@ -519,7 +519,7 @@ class PumpOperation(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.config(cursor='none')
+        #self.config(cursor='none')
         self.servo_gpio = 12 # PIN 32 = GPIO 12
               
         color1 = 'white'
