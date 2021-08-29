@@ -33,7 +33,8 @@ import logging
 ##############################################################################
 class Pump:
     
-    def __init__(self, direction_pin, return_sensor, motor_pin, enable_pin, length, pulse_per_revolution, length_per_revolution, tube_diameter, remaining_degrees):
+    def __init__(self, direction_pin, return_sensor, motor_pin, enable_pin, length, pulse_per_revolution,
+                 length_per_revolution, tube_diameter, remaining_degrees, gear_ratio):
         self.logging = logging
         self.logging.basicConfig(filename="PumpErrorLog.log",  level=logging.INFO)
         self.logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -48,6 +49,10 @@ class Pump:
         self.pulse_per_revolution = pulse_per_revolution
         self.length_per_revolution = length_per_revolution #3 #in millimeter, was 20
         self.tube_diameter = float(tube_diameter)
+        
+        self.gear_ratio = gear_ratio
+        
+        self.return_wave_delay = 4
         
         self.volume_value = 1
         self.rate_value = 30
@@ -65,7 +70,7 @@ class Pump:
         self.max_degrees = 360
         
         #REMAINING DEGREES - Change request by Albert. have left original code vars as remaining_steps
-        self.remaining_steps = int(self.pulse_per_revolution / (self.max_degrees / remaining_degrees))
+        self.remaining_steps = int(self.pulse_per_revolution / (self.max_degrees / remaining_degrees)) * self.gear_ratio
         #self.remaining_steps = int(self.pulse_per_revolution * remaining_degrees) #13.5 / 2.25
         self.main_divide = 100
         self.length = 20 # was 20
@@ -130,8 +135,9 @@ class Pump:
         
         self.pi.wave_clear()
         return_frequency = int(self.pulse_per_revolution)
-        return_micros = int(500000 / return_frequency)
+        return_micros = int(500000 / (return_frequency / self.return_wave_delay))
         return_wave = []
+        #                                        ON     OFF  DELAY us
         return_wave.append(pigpio.pulse(1 << self.motor, 0, return_micros))
         return_wave.append(pigpio.pulse(0, 1 << self.motor, return_micros))
         self.pi.wave_add_generic(return_wave)
@@ -140,11 +146,14 @@ class Pump:
     def initial_wave_setting(self):
 
         if self.remaining_steps <= 65535: #65535 = 255 * 256
+            print('Init Wave set if')
+            print('remaining steps = ', self.remaining_steps)
             x_1_1 = self.remaining_steps & 255
             y_1_1 = self.remaining_steps >> 8
             self.initial_wave_chain = [255, 0, self.return_wave_chain, 255, 1, x_1_1, y_1_1]
         
         else:
+            print('Init Wave set else')
             self.initialise_step = int(self.remaining_steps / 65535)
             x_1_1 = 65535 & 255
             y_1_1 = 65535 >> 8
@@ -347,7 +356,11 @@ class Pump:
         self.new_down_divide = int(self.main_divide - systolic_percentage_value - 1)
         self.scale_value = rate_value / 60
         self.pulse_time = round(0.01 / self.scale_value, -5)
-        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (10 * self.length_per_revolution), 0) / 1.780)
+        #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (10 * self.length_per_revolution), 0) / 1.780)
+        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (855), 1) / 1.78)* self.gear_ratio  
+        #self.step_count = int((round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.8)/1000) * self.gear_ratio
+        #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.780)
+ 
         #print(step_count)
         self.up_curve_setting()
         self.down_curve_setting()
@@ -430,14 +443,14 @@ class Pump:
             self.move_initial_start = True
             #status_bar['text'] = 'Move to Initial position'
             if self.initialise_step == 0:
-                #print("im in IF")
+                print("im in IF ret ini start")
                 self.pi.wave_chain(self.initial_wave_chain)
                 while self.pi.wave_tx_busy():
                     pass
                 self.move_initial_end = True
             
             else:
-                #print("Im in Else")
+                print("Im in Else ret init start")
                 self.move_initial_start = True
                 for run_time in range(self.initialise_step):
                     self.pi.wave_chain(self.initial_wave_chain_1)
@@ -609,5 +622,4 @@ class Occluder:
         self.pi.set_servo_pulsewidth(self.servo_gpio, pulse_width) #set servo duty
    
 ## End Occluder Class ##  
-#######################################################################        
-    
+#######################################################################
