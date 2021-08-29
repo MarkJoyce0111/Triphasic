@@ -58,6 +58,7 @@ class TriphasicApp(tk.Tk, Pump):
         self.__lock_on_start = False
         self.__remaining_degrees = 1
         self.__occlusion = 0
+        self.__gear_ratio = 1
         
 
         # the container is where we'll stack a bunch of frames
@@ -94,7 +95,7 @@ class TriphasicApp(tk.Tk, Pump):
         defaultDict = {"tube_diameter": 25, "pulse_per_revolution": 5000,"length_per_revolution": 3,
                        "systolic_percentage_value": 50, "stroke_volume_value": 6,
                        "rate_value": 60, "peak_percentage_value": 50, "lock_on_start": False,
-                       "remaining_degrees": 1, "occlusion": 0} 
+                       "remaining_degrees": 1, "occlusion": 0, "gear_ratio": 1} 
         
         if os.path.isfile(path):    
             f = open(path, "r")
@@ -120,28 +121,22 @@ class TriphasicApp(tk.Tk, Pump):
         
         self.set_lock_on_start(converted['lock_on_start'])
         self.set_remaining_degrees(converted['remaining_degrees'])
+        self.set_occlusion(converted['occlusion'])
+        self.set_gear_ratio(converted['gear_ratio'])
         
-        try:
-            self.set_occlusion(converted['occlusion'])
-        except:
-            converted['occlusion'] = 0
-            self.set_occlusion(converted['occlusion'])
-            self.save_info_file(converted['tube_diameter'], converted['pulse_per_revolution'],
-                           converted['length_per_revolution'],
-                           converted['systolic_percentage_value'],
-                           converted['stroke_volume_value'],
-                           converted['rate_value'], converted['peak_percentage_value'],
-                           converted['lock_on_start'], converted['remaining_degrees'],
-                           converted['occlusion'])
+
             
         
     # Save config File            
-    def save_info_file(self, tube_diameter, pulse_per_revolution, length_per_revolution, systolic_percentage_value, stroke_volume_value, rate_value, peak_percentage_value, lock_on_start_value,remaining_degrees, occlusion):
+    def save_info_file(self, tube_diameter, pulse_per_revolution, length_per_revolution, systolic_percentage_value,
+                       stroke_volume_value, rate_value, peak_percentage_value, lock_on_start_value,remaining_degrees,
+                       occlusion, gear_ratio):
         
         defaultDict = {"tube_diameter": tube_diameter, "pulse_per_revolution": pulse_per_revolution,
                        "length_per_revolution": length_per_revolution, "systolic_percentage_value": systolic_percentage_value,
                        "stroke_volume_value": stroke_volume_value, "rate_value": rate_value, "peak_percentage_value": peak_percentage_value,
-                       "lock_on_start": lock_on_start_value, "remaining_degrees": remaining_degrees, "occlusion": occlusion}
+                       "lock_on_start": lock_on_start_value, "remaining_degrees": remaining_degrees, "occlusion": occlusion,
+                       "gear_ratio": gear_ratio}
         default_json = json.dumps(defaultDict, indent=4) # Dictionary to JSON
         f = open('config.json',"w")
         f.write(default_json)
@@ -179,6 +174,9 @@ class TriphasicApp(tk.Tk, Pump):
     
     def get_occlusion(self):
         return self.__occlusion
+    
+    def get_gear_ratio(self):
+        return self.__gear_ratio
 
 ######################SETTERS########################
     
@@ -211,6 +209,9 @@ class TriphasicApp(tk.Tk, Pump):
         
     def set_occlusion(self, occlusion):
         self.__occlusion = occlusion
+        
+    def set_gear_ratio(self, gear_ratio):
+        self.__gear_ratio = gear_ratio
         
         
 class SplashScreen(tk.Frame):
@@ -319,6 +320,8 @@ class CalPumpChamber(tk.Frame):
             controller.set_lock_on_start(var1.get())
             controller.set_remaining_degrees(remaining_degrees_slider.get())
             controller.set_occlusion(occlusion_slider.get())
+            controller.set_gear_ratio(gear_ratio_slider.get())
+            print(controller.get_gear_ratio())
             #Save Data
             controller.save_info_file(controller.get_tube_diameter(),
                                       controller.get_pulse_per_revolution(),
@@ -329,7 +332,8 @@ class CalPumpChamber(tk.Frame):
                                       controller.get_peak_percentage_value(),
                                       controller.get_lock_on_start(),
                                       controller.get_remaining_degrees(),
-                                      controller.get_occlusion())
+                                      controller.get_occlusion(),
+                                      controller.get_gear_ratio())
                                       
 
             controller.destroy() #<-- END WITH
@@ -345,6 +349,7 @@ class CalPumpChamber(tk.Frame):
         self.peak_percentage_value = controller.get_peak_percentage_value()
         self.remaining_degrees_value = controller.get_remaining_degrees()
         self.occlusion_value = controller.get_occlusion()
+        self.gear_ratio_value = controller.get_gear_ratio()
         # Create/Set Tk String Vars
         self.tube_diameter = tk.StringVar()
         self.tube_diameter.set(self.tube_diameter_value)
@@ -362,6 +367,8 @@ class CalPumpChamber(tk.Frame):
         self.remaining_degrees.set(self.remaining_degrees_value)
         self.occlusion = tk.StringVar()
         self.occlusion.set(self.occlusion_value)
+        self.gear_ratio = tk.StringVar()
+        self.gear_ratio.set(self.gear_ratio)
         
         self.spinner_font = tkfont.Font(family='Helvetica', size=25, weight='bold')
         self.label_font = tkfont.Font(family = "Times New Roman", size = 13, weight = "bold")
@@ -424,13 +431,13 @@ class CalPumpChamber(tk.Frame):
         stroke_volume_value_label = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_value_label.grid(row = 9, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_value_spinbox = tk.Spinbox(self,  from_ = 1, to = 100, width = 5, bg = 'orange',
+        stroke_volume_value_spinbox = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_value_spinbox['state'] = 'readonly'
         stroke_volume_value_spinbox.grid(row = 10, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_value_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 100, showvalue = 0, bg = 'orange',
+        stroke_volume_value_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume, sliderlength = 60, width = 60)
         stroke_volume_value_slider.grid(row = 13, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_value_slider.set(self.stroke_volume_value)     
@@ -501,16 +508,27 @@ class CalPumpChamber(tk.Frame):
                                                  length = 150, variable = self.occlusion, sliderlength = 60, width = 60)
         occlusion_slider.grid(row = 17, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         occlusion_slider.set(self.occlusion_value)
+         
+        gear_ratio_label = tk.Label(self, text = 'Gear Ratio', font = self.label_font, bg = 'gray8', fg='white')
+        gear_ratio_label.grid(row = 15, column = 1, columnspan = 1, sticky = 'nesw')
+        gear_ratio_spinbox = tk.Spinbox(self, from_ = 1, to = 10, increment = 1, width = 5, bg = 'gray8', fg = 'white',
+                                                    textvariable = self.gear_ratio, justify = 'right',
+                                                    font=self.spinner_font)
+        gear_ratio_spinbox.grid(row = 16, column = 1, rowspan = 1, sticky = 'nesw')
+        gear_ratio_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 10, resolution = 1, showvalue = 0, bg = 'gray8',
+                                                 length = 150, variable = self.gear_ratio, sliderlength = 60, width = 60)
+        gear_ratio_slider.grid(row = 17, column = 1, rowspan = 1, columnspan = 1, sticky = 'nesw')
+        gear_ratio_slider.set(self.gear_ratio_value)
         
         #Exit Buttons ----------------------
         no_save_button = tk.Button(self, text="Exit without saving", font = self.label_font, command=lambda: controller.show_frame("MainMenu"),bg = 'red')
-        no_save_button.grid(row = 17, column = 3, columnspan = 1, sticky = 'nesw')
+        no_save_button.grid(row = 18, column = 1, columnspan = 1, sticky = 'nesw')
         
         save_button = tk.Button(self, text= "Save - Restart required", font = self.label_font, command=saveStuff, bg = 'limegreen')
-        save_button.grid(row = 17, column = 2, columnspan = 1, sticky = 'nesw')
+        save_button.grid(row = 18, column = 0, columnspan = 1, sticky = 'nesw')
         
         lock_on_start = tk.Checkbutton(self, text="Lock controls @ start", variable = var1, onvalue=True, offvalue=False)
-        lock_on_start.grid(row=15, column= 1, columnspan = 1, sticky='nesw')
+        lock_on_start.grid(row=15, column= 3, columnspan = 1, sticky='nesw')
          
         
 # Pump Operation Class / Page
@@ -855,8 +873,8 @@ class PumpOperation(tk.Frame):
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
         #Pump instance
         self.pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
-                         controller.get_tube_diameter(), controller.get_remaining_degrees())
-        
+                         controller.get_tube_diameter(), controller.get_remaining_degrees(), controller.get_gear_ratio())
+        print('gear = ', controller.get_gear_ratio())
         #Set pump vars
         self.pump.volume_value = controller.get_stroke_volume_value()
         self.pump.rate_value = controller.get_rate_value()
@@ -1191,12 +1209,7 @@ class RunTests(tk.Frame):
         occlusion_slider_to = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
                                                  length = 150, variable = self.occlusion_to, sliderlength = 60, width = 60)
         occlusion_slider_to.grid(row = 3, column = 3, rowspan = 1, columnspan = 1, sticky = 'nesw')
-        occlusion_slider_to.set(self.occlusion_value_to)
-        
-        
-        
-        
-        
+        occlusion_slider_to.set(self.occlusion_value_to)        
         
         minimum_value_label = tk.Label(self, text="Minimum test values - From", font=self.controller.title_font)
         minimum_value_label.grid(row = 4, column = 0, columnspan = 1, sticky = 'nesw')
@@ -1206,13 +1219,13 @@ class RunTests(tk.Frame):
         stroke_volume_label_MIN = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_label_MIN.grid(row = 9, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_spinbox_MIN = tk.Spinbox(self,  from_ = 1, to = 100, width = 5, bg = 'orange',
+        stroke_volume_spinbox_MIN = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume_MIN, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_spinbox_MIN['state'] = 'readonly'
         stroke_volume_spinbox_MIN.grid(row = 10, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_slider_MIN = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 100, showvalue = 0, bg = 'orange',
+        stroke_volume_slider_MIN = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume_MIN, sliderlength = 60, width = 60)
         stroke_volume_slider_MIN.grid(row = 13, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_slider_MIN.set(self.stroke_volume_value_MIN)     
@@ -1271,13 +1284,13 @@ class RunTests(tk.Frame):
         stroke_volume_label_MAX = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_label_MAX.grid(row = 15, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_spinbox_MAX = tk.Spinbox(self,  from_ = 1, to = 100, width = 5, bg = 'orange',
+        stroke_volume_spinbox_MAX = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume_max, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_spinbox_MAX['state'] = 'readonly'
         stroke_volume_spinbox_MAX.grid(row = 18, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_slider_MAX = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 100, showvalue = 0, bg = 'orange',
+        stroke_volume_slider_MAX = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume_max, sliderlength = 60, width = 60)
         stroke_volume_slider_MAX.grid(row = 19, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_slider_MAX.set(self.stroke_volume_value_MIN)     
@@ -1462,7 +1475,7 @@ class AutomateTests(tk.Frame):
             
             #Create Pump instance
             self.test_pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
-                             self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees())
+                             self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees(), controller.get_gear_ratio())
             #Create Servo Instance
             self.throttle_valve = Occluder(self.servo_gpio,600,2300)
             self.throttle_valve.set_angle(self.controller.test_settings['occlusion_from'])
@@ -1506,11 +1519,18 @@ class AutomateTests(tk.Frame):
             self.test_pump.return_wave_setting()
             self.test_pump.initial_wave_setting()
             self.test_pump.step_count_setting()
-            self.test_pump.return_initial_function() # Zero pump drive
-            time.sleep(1)
+            
+            self.test_pump.running = False 
             self.test_pump.return_initial_function()
-            time.sleep(1)
-            self.test_pump .running = False
+            self.test_pump.move_initial_funct_done = False
+            while(self.test_pump.move_initial_funct_done == False):
+                pass
+            time.sleep(2)
+            self.test_pump.return_initial_function()
+            self.test_pump.move_initial_funct_done = False
+            while(self.test_pump.move_initial_funct_done == False):
+                pass
+            time.sleep(5)
             #Start Pump - Thread!
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
             #Loop through test values
