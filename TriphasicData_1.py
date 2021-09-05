@@ -872,7 +872,7 @@ class PumpOperation(tk.Frame):
         #Servo Instance
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
         #Pump instance
-        self.pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
+        self.pump = Pump(17,27,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
                          controller.get_tube_diameter(), controller.get_remaining_degrees(), controller.get_gear_ratio())
         print('gear = ', controller.get_gear_ratio())
         #Set pump vars
@@ -1474,7 +1474,7 @@ class AutomateTests(tk.Frame):
             self.servo_gpio = 12 # PIN 32 = GPIO 12
             
             #Create Pump instance
-            self.test_pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
+            self.test_pump = Pump(17,27,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
                              self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees(), controller.get_gear_ratio())
             #Create Servo Instance
             self.throttle_valve = Occluder(self.servo_gpio,600,2300)
