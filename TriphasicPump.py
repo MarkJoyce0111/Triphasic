@@ -201,9 +201,14 @@ class Pump:
             up_step_count = up_step_count + int(single_up_frequency / 100)
 
         up_remainder = self.step_count - up_step_count
-       
+        print("UF len = ",len(up_frequency))
+        print("upremainder = ", up_remainder)
+        
         if up_remainder < 0:
             up_index = [z for z in range(len(up_pulse)) if up_pulse[z] > 1]
+            print("up I len =", len(up_index))
+            if abs(up_remainder) > len(up_index):
+                up_remainder = len(up_index)
             for y in range(abs(up_remainder)):
                 up_frequency[up_index[y]] = up_frequency[up_index[y]] - 100
                 up_pulse[up_index[y]] = up_pulse[up_index[y]] - 1
@@ -286,12 +291,17 @@ class Pump:
             
         down_remainder = self.up_step_total - down_step_count
         
-        #print("down pulse = ", down_pulse)
-        #print("down frequency = ",down_frequency)
+        print("diwn Remainder = ", down_remainder)
+        print("down frequency = ", len(down_frequency))
         
         if down_remainder < 0:
             down_index = [w for w in range(len(down_pulse)) if down_pulse[w] > 1]
             #print("down Index", down_index)
+            print("down I =", len(down_index))
+            if abs(down_remainder) > len(down_index):
+                down_remainder = len(down_index)
+                
+                
             for v in range(abs(down_remainder)):
                 down_frequency[down_index[v]] = down_frequency[down_index[v]] - 100
                 down_pulse[down_index[v]] = down_pulse[down_index[v]] - 1
@@ -303,7 +313,7 @@ class Pump:
         
         for o in range(self.new_down_divide):
             down_frequency[o] = int(round(down_frequency[o] * self.scale_value, -2))
-            if(down_frequency[o] == 0): #<-----------------------------------------------------ADDED NEW!
+            if(len(down_frequency) < down_remainder): #<-----------------------------------------------------ADDED NEW!
                 down_frequency[o] = 10
                 self.logging.info("*****************************************************************")
                 self.logging.info("                         Down Freq Div by zero Fix               ")
@@ -315,7 +325,7 @@ class Pump:
                 self.logging.info("Systolic % Value = " + str(self.systolic_percentage_value) + "%")
                 self.logging.info("Peak % Value = "+ str(self.peak_percentage_value) + "%")
                 self.logging.info("*****************************************************************")
-                
+            down_remainder = len(down_frequency)
         
         self.down_times = int(self.new_down_divide / self.length)
         down_extra = int(self.new_down_divide % self.length)
@@ -357,7 +367,16 @@ class Pump:
         self.scale_value = rate_value / 60
         self.pulse_time = round(0.01 / self.scale_value, -5)
         #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (10 * self.length_per_revolution), 0) / 1.780)
-        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (855), 1) / 1.78)* self.gear_ratio  
+        #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (855), 1) / 1.78)* self.gear_ratio  
+        #magicNumber = self.pulse_per_revolution * 0.03# 150 _> 3% of 5000 #600  ->  12% of 5000 = 600
+       #magicNumber += magicNumber * 0.02 # 12 -> so we get the full range of 12% rotation.
+        #self.step_count = int((volume_value / 100) * magicNumber) * self.gear_ratio
+        magicNumber = 1125 # gives me 3% of 360 degrees (1540 steps of 51200) 
+        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (magicNumber), 1) / 1.78) * self.gear_ratio
+        print("Magic Number = ", magicNumber)
+        print("Step Count = ", self.step_count)
+        
+        
         #self.step_count = int((round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.8)/1000) * self.gear_ratio
         #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.780)
  
@@ -493,18 +512,18 @@ class CsvWriter:
      
     # Create file with header
     def create_csv_file_and_header(self, fileName):
-        with open(fileName, mode='w') as employee_file:
+        with open(fileName, mode='w') as data_file:
 
-            employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            data_writer = csv.writer(data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             #fieldnames = ['emp_name', 'dept', 'birth_month']
             fieldnames = ['Tube Diameter', 'Length Per Rev', 'Stroke Volume', 'Heart Rate', 'Systolic Percentage', 'Peak Percentage', 'Index', 'PSI', 'Flow', 'Throttle Valve Setting']
-            employee_writer.writerow(fieldnames)
+            data_writer.writerow(fieldnames)
     
     # Write data to file    
     def add_data_to_csv(self, fileName, Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, Throttle_Valve_Setting):
         with open(fileName, mode='a') as employee_file:
-            employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, Throttle_Valve_Setting])
+            data_writer = csv.writer(data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            data_writer.writerow([Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, Throttle_Valve_Setting])
  
  
 ##############################################################################
