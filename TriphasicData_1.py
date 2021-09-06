@@ -92,7 +92,7 @@ class TriphasicApp(tk.Tk, Pump):
     # Config File, JSON.
     def check_info_file(self,path):
         
-        defaultDict = {"tube_diameter": 25, "pulse_per_revolution": 5000,"length_per_revolution": 3,
+        defaultDict = {"tube_diameter": 25, "pulse_per_revolution": 5000,"length_per_revolution": 1125,
                        "systolic_percentage_value": 50, "stroke_volume_value": 6,
                        "rate_value": 60, "peak_percentage_value": 50, "lock_on_start": False,
                        "remaining_degrees": 1, "occlusion": 0, "gear_ratio": 1} 
@@ -415,13 +415,13 @@ class CalPumpChamber(tk.Frame):
         length_per_revolution_label = tk.Label(self, text = 'Length Per Rev (mm)', font = self.label_font, bg = 'tomato')
         length_per_revolution_label.grid(row = 2, column = 2, columnspan = 1, sticky = 'nesw')
         
-        length_per_revolution_spinbox = tk.Spinbox(self,  from_ = 1, to = 20, width = 5, bg = 'tomato',
+        length_per_revolution_spinbox = tk.Spinbox(self,  from_ = 900, to = 2500, width = 5, bg = 'tomato',
                                                    textvariable = self.length_per_revolution, justify = 'right',
                                                    font=self.spinner_font)
         length_per_revolution_spinbox['state'] = 'readonly'
         length_per_revolution_spinbox.grid(row = 3, column = 2, rowspan = 1, sticky = 'nesw')
             
-        length_per_revolution_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 20,
+        length_per_revolution_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 900, to = 2500,
                                                 showvalue = 0, bg = 'tomato', length = 200,
                                                 variable = self.length_per_revolution, sliderlength = 60, width = 60)
         length_per_revolution_slider.grid(row = 5, column = 2, rowspan = 1, columnspan = 1, sticky = 'nesw')
@@ -431,13 +431,13 @@ class CalPumpChamber(tk.Frame):
         stroke_volume_value_label = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_value_label.grid(row = 9, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_value_spinbox = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
+        stroke_volume_value_spinbox = tk.Spinbox(self,  from_ = 3, to = 100, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_value_spinbox['state'] = 'readonly'
         stroke_volume_value_spinbox.grid(row = 10, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_value_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
+        stroke_volume_value_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 3, to = 100, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume, sliderlength = 60, width = 60)
         stroke_volume_value_slider.grid(row = 13, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_value_slider.set(self.stroke_volume_value)     
@@ -872,7 +872,7 @@ class PumpOperation(tk.Frame):
         #Servo Instance
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
         #Pump instance
-        self.pump = Pump(17,27,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
+        self.pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
                          controller.get_tube_diameter(), controller.get_remaining_degrees(), controller.get_gear_ratio())
         print('gear = ', controller.get_gear_ratio())
         #Set pump vars
@@ -896,7 +896,7 @@ class PumpOperation(tk.Frame):
         
         status_bar.grid(row = 0, column = 0, rowspan = 1, columnspan = 18, sticky = 'nesw')
         
-        stroke_vol_slider = tk.Scale(self, from_ = 98, to = 1, showvalue = 0, bg = 'orange', length = 200,
+        stroke_vol_slider = tk.Scale(self, from_ = 100, to = 3, showvalue = 0, bg = 'orange', length = 200,
                                      sliderlength = 60, width = 20)
         
         heart_rate_slider = tk.Scale(self, from_ = 120, to = 30, showvalue = 0, bg = 'pink', length = 200,
@@ -941,7 +941,7 @@ class PumpOperation(tk.Frame):
         
         #Adjustment setting
         stroke_vol_label = tk.Label(self, text = 'Stroke volume', font = controller.allfont, bg = 'orange')
-        stroke_vol_spinbox = tk.Spinbox(self, command = change_detect_no_event, from_ = 1, to = 98, width = 2, bg = 'orange',
+        stroke_vol_spinbox = tk.Spinbox(self, command = change_detect_no_event, from_ = 3, to = 100, width = 2, bg = 'orange',
                                         textvariable = self.stroke_volume, justify = 'right', font = self.spinner_font)
         stroke_vol_spinbox['state'] = 'disabled'
         stroke_vol_slider.bind("<ButtonRelease-1>", change_detect)
@@ -1167,8 +1167,8 @@ class RunTests(tk.Frame):
         tube_diameter_spinbox.grid(row = 2, column = 0, rowspan = 1, sticky = 'nesw')
             
         tube_diameter_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 2, to = 50,
-                                        showvalue = 0, bg = 'light green', length = 10, variable = self.tube_diameter,
-                                        sliderlength = 60, width = 60)
+                                        showvalue = 0, bg = 'light green', length = 5, variable = self.tube_diameter,
+                                        sliderlength = 30, width = 30)
         tube_diameter_slider.grid(row = 3, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         tube_diameter_slider.set(self.tube_diameter_value)
         
@@ -1176,15 +1176,15 @@ class RunTests(tk.Frame):
         length_per_revolution_label = tk.Label(self, text = 'Length Per Rev (mm)', font = self.label_font, bg = 'tomato')
         length_per_revolution_label.grid(row = 1, column = 1, columnspan = 1, sticky = 'nesw')
         
-        length_per_revolution_spinbox = tk.Spinbox(self,  from_ = 1, to = 20, width = 5, bg = 'tomato',
+        length_per_revolution_spinbox = tk.Spinbox(self,  from_ = 900, to = 2500, width = 5, bg = 'tomato',
                                                    textvariable = self.length_per_revolution, justify = 'right',
                                                    font=self.spinner_font)
         length_per_revolution_spinbox['state'] = 'readonly'
         length_per_revolution_spinbox.grid(row = 2, column = 1, rowspan = 1, sticky = 'nesw')
             
-        length_per_revolution_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 20,
+        length_per_revolution_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 900, to = 2500,
                                                 showvalue = 0, bg = 'tomato', length = 200,
-                                                variable = self.length_per_revolution, sliderlength = 60, width = 60)
+                                                variable = self.length_per_revolution, sliderlength = 30, width = 30)
         length_per_revolution_slider.grid(row = 3, column = 1, rowspan = 1, columnspan = 1, sticky = 'nesw')
         length_per_revolution_slider.set(self.length_per_revolution_value)
         
@@ -1195,7 +1195,7 @@ class RunTests(tk.Frame):
                                                     font=self.spinner_font)
         occlusion_spinbox_from.grid(row = 2, column = 2, rowspan = 1, sticky = 'nesw')
         occlusion_slider_from = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
-                                                 length = 150, variable = self.occlusion_from, sliderlength = 60, width = 60)
+                                                 length = 150, variable = self.occlusion_from, sliderlength = 30, width = 30)
         occlusion_slider_from.grid(row = 3, column = 2, rowspan = 1, columnspan = 1, sticky = 'nesw')
         occlusion_slider_from.set(self.occlusion_value_from)
         
@@ -1207,7 +1207,7 @@ class RunTests(tk.Frame):
                                                     font=self.spinner_font)
         occlusion_spinbox_to.grid(row = 2, column = 3, rowspan = 1, sticky = 'nesw')
         occlusion_slider_to = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 0, to = 180, showvalue = 0, bg = 'MediumOrchid2',
-                                                 length = 150, variable = self.occlusion_to, sliderlength = 60, width = 60)
+                                                 length = 150, variable = self.occlusion_to, sliderlength = 30, width = 30)
         occlusion_slider_to.grid(row = 3, column = 3, rowspan = 1, columnspan = 1, sticky = 'nesw')
         occlusion_slider_to.set(self.occlusion_value_to)        
         
@@ -1219,13 +1219,13 @@ class RunTests(tk.Frame):
         stroke_volume_label_MIN = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_label_MIN.grid(row = 9, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_spinbox_MIN = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
+        stroke_volume_spinbox_MIN = tk.Spinbox(self,  from_ = 3, to = 100, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume_MIN, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_spinbox_MIN['state'] = 'readonly'
         stroke_volume_spinbox_MIN.grid(row = 10, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_slider_MIN = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
+        stroke_volume_slider_MIN = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 3, to = 100, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume_MIN, sliderlength = 60, width = 60)
         stroke_volume_slider_MIN.grid(row = 13, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_slider_MIN.set(self.stroke_volume_value_MIN)     
@@ -1284,13 +1284,13 @@ class RunTests(tk.Frame):
         stroke_volume_label_MAX = tk.Label(self, text = 'Stroke Volume', font = self.label_font, bg = 'orange')
         stroke_volume_label_MAX.grid(row = 15, column = 0, columnspan = 1, sticky = 'nesw')
         
-        stroke_volume_spinbox_MAX = tk.Spinbox(self,  from_ = 1, to = 98, width = 5, bg = 'orange',
+        stroke_volume_spinbox_MAX = tk.Spinbox(self,  from_ = 3, to = 100, width = 5, bg = 'orange',
                                                     textvariable = self.stroke_volume_max, justify = 'right',
                                                     font=self.spinner_font)
         stroke_volume_spinbox_MAX['state'] = 'readonly'
         stroke_volume_spinbox_MAX.grid(row = 18, column = 0, rowspan = 1, sticky = 'nesw')
             
-        stroke_volume_slider_MAX = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 98, showvalue = 0, bg = 'orange',
+        stroke_volume_slider_MAX = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 3, to = 100, showvalue = 0, bg = 'orange',
                                                  length = 150, variable = self.stroke_volume_max, sliderlength = 60, width = 60)
         stroke_volume_slider_MAX.grid(row = 19, column = 0, rowspan = 1, columnspan = 1, sticky = 'nesw')
         stroke_volume_slider_MAX.set(self.stroke_volume_value_MIN)     
@@ -1414,10 +1414,11 @@ class AutomateTests(tk.Frame):
         #Update GUI
         #Call get sensor data Multiprocess
         def get_sensor_data():
+            self.time_per_test = 1.5 #seconds
             test_number_label['text'] = "Test: " + str(self.test_number)
             self.remaining_tests = int(self.total_tests) - 1
             remaining_tests_label['text'] = "Remaining Tests: " + str(self.remaining_tests)
-            self.total_time = (((self.total_tests * 3) / 60) / 60 ) / 24
+            self.total_time = (((self.total_tests * self.time_per_test) / 60) / 60 ) / 24
             
             if self.total_time < 1:
                 self.total_time = self.total_time * 24 #days to hours
@@ -1450,7 +1451,13 @@ class AutomateTests(tk.Frame):
         #Get Sensor Data
         #Write data into CSV
         def collect_data():
+            #start_time = datetime.now()
             self.psi_xs, self.psi_ys, self.flow_xs, self.flow_ys = self.sensors.get_sensor_values()
+            #end_time = datetime.now()
+            #time_diff = (end_time - start_time)
+            #execution_time = time_diff.total_seconds() * 1000
+            #print(execution_time)
+            
             #self.throttle_valve_setting = controller.get_occlusion()
             #print(self.psi_ys)
   #add_data_to_csv(self, fileName, Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, )
@@ -1474,7 +1481,7 @@ class AutomateTests(tk.Frame):
             self.servo_gpio = 12 # PIN 32 = GPIO 12
             
             #Create Pump instance
-            self.test_pump = Pump(17,27,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
+            self.test_pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
                              self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees(), controller.get_gear_ratio())
             #Create Servo Instance
             self.throttle_valve = Occluder(self.servo_gpio,600,2300)
@@ -1503,9 +1510,9 @@ class AutomateTests(tk.Frame):
             self.throttle_valve_min = self.controller.test_settings['occlusion_from']
             self.throttle_valve_max = self.controller.test_settings['occlusion_to']
             #Total tests vars
-            self.throttleValveNums = (self.controller.test_settings['occlusion_to'] - self.controller.test_settings['occlusion_from']) + 1
-            self.strokeVolNums = (self.controller.test_settings['stroke_volume_MAX'] - self.controller.test_settings['stroke_volume_MIN']) + 1
-            self.hearRateNums = (self.controller.test_settings['heart_rate_MAX'] - self.controller.test_settings['heart_rate_MIN']) + 1
+            self.throttleValveNums = ((self.controller.test_settings['occlusion_to'] - self.controller.test_settings['occlusion_from']) / 10) + 1
+            self.strokeVolNums = ((self.controller.test_settings['stroke_volume_MAX'] - self.controller.test_settings['stroke_volume_MIN']) / 10) + 1
+            self.hearRateNums = ((self.controller.test_settings['heart_rate_MAX'] - self.controller.test_settings['heart_rate_MIN']) / 10) + 1
             self.sytoleNums = ((self.controller.test_settings['systolic_percentage_MAX'] - self.controller.test_settings['systolic_percentage_MIN']) / 10) + 1 
             self.peakNums = ((self.controller.test_settings['peak_percentage_MAX'] - self.controller.test_settings['peak_percentage_MIN']) / 10) + 1     
             self.total_tests = self.throttleValveNums * self.strokeVolNums * self.hearRateNums * self.sytoleNums * self.peakNums
@@ -1534,19 +1541,19 @@ class AutomateTests(tk.Frame):
             #Start Pump - Thread!
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
             #Loop through test values
-            for h in range(self.throttle_valve_min, self.throttle_valve_max + 1):
+            for h in range(self.throttle_valve_min, self.throttle_valve_max + 1, 10):
                 self.throttle_valve.set_angle(h)
                 self.throttle_val = h
                 current_throttle_value_label['text'] = str(h)
                 
-                for i in range(self.stroke_volume_min, self.stroke_volume_max + 1):
+                for i in range(self.stroke_volume_min, self.stroke_volume_max + 1, 10):
                     feed_back_label['text'] = "Running Tests"                
                     current_stroke_volume_label['text'] = str(i)
                     current_stroke_volume_label.config(text = str(i))
                     self.test_pump.volume_value = i
                     #time.sleep(0.5)
                       
-                    for j in range(self.heart_rate_min , self.heart_rate_max + 1):
+                    for j in range(self.heart_rate_min , self.heart_rate_max + 1, 10):
                         current_heart_rate_label['text'] = str(j)
                         current_heart_rate_label.config(text = str(j))
                         self.test_pump.rate_value = j
