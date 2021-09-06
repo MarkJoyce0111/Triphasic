@@ -367,19 +367,9 @@ class Pump:
         self.scale_value = rate_value / 60
         self.pulse_time = round(0.01 / self.scale_value, -5)
         #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (10 * self.length_per_revolution), 0) / 1.780)
-        #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (855), 1) / 1.78)* self.gear_ratio  
-        #magicNumber = self.pulse_per_revolution * 0.03# 150 _> 3% of 5000 #600  ->  12% of 5000 = 600
-       #magicNumber += magicNumber * 0.02 # 12 -> so we get the full range of 12% rotation.
-        #self.step_count = int((volume_value / 100) * magicNumber) * self.gear_ratio
-        magicNumber = 1125 # gives me 3% of 360 degrees (1540 steps of 51200) 
-        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (magicNumber), 1) / 1.78) * self.gear_ratio
-        print("Magic Number = ", magicNumber)
-        print("Step Count = ", self.step_count)
-        
-        
-        #self.step_count = int((round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.8)/1000) * self.gear_ratio
-        #self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter), 0) / 1.780)
- 
+        #magicNumber = 1125 # gives me 3% of 360 degrees (1540 steps of 51200) 
+        self.step_count = int(round((math.sqrt(volume_value) * self.pulse_per_revolution * self.tube_diameter) / (self.length_per_revolution), 1) / 1.78) * self.gear_ratio
+  
         #print(step_count)
         self.up_curve_setting()
         self.down_curve_setting()
@@ -521,7 +511,7 @@ class CsvWriter:
     
     # Write data to file    
     def add_data_to_csv(self, fileName, Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, Throttle_Valve_Setting):
-        with open(fileName, mode='a') as employee_file:
+        with open(fileName, mode='a') as data_file:
             data_writer = csv.writer(data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             data_writer.writerow([Tube_Diameter, Length_Per_Rev, Stroke_Volume, Heart_Rate, Systolic_Percentage, Peak_Percentage, Index, PSI, Flow, Throttle_Valve_Setting])
  
@@ -560,7 +550,7 @@ class PumpSensor:
         self.psi_ys.clear()
         self.flow_xs.clear()
         self.flow_ys.clear()
-        for t in range(0, 200):
+        for t in range(0, 100):
             
             # Read pressure form sensor
             self.voltage_reading = self.psi_channel.voltage
