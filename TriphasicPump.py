@@ -441,11 +441,12 @@ class Pump:
             
             #status_bar['text'] = 'Back to home position'
             #print(return_wave_chain)
-            self.pi.wave_send_repeat(self.return_wave_chain)
-            while self.pi.read(self.return_sensor) == 0:
-                pass
-            
-            self.pi.wave_tx_stop()
+            if self.pi.read(self.return_sensor) == 0:
+                self.pi.wave_send_repeat(self.return_wave_chain)
+                while self.pi.read(self.return_sensor) == 0:
+                    pass
+                
+                self.pi.wave_tx_stop()
             
         
         else:
@@ -550,7 +551,7 @@ class PumpSensor:
         self.psi_ys.clear()
         self.flow_xs.clear()
         self.flow_ys.clear()
-        for t in range(0, 100):
+        for t in range(0, 200):
             
             # Read pressure form sensor
             self.voltage_reading = self.psi_channel.voltage
@@ -632,3 +633,4 @@ class Occluder:
    
 ## End Occluder Class ##  
 #######################################################################
+
