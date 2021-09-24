@@ -23,7 +23,7 @@ if not
 "pip3 install pigpio"  
 4.  
 Install matplotlib
-"pip install matplotlib"
+"pip install matplotlib"   
 5.   
 Then download this repository.  
 Create a folder to download into. 
