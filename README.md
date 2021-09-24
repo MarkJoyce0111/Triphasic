@@ -22,6 +22,9 @@ PIGPIO lib was already installed on Rasp
 if not  
 "pip3 install pigpio"  
 4.  
+Install matplotlib
+"pip install matplotlib"
+5.   
 Then download this repository.  
 Create a folder to download into. 
 ie.  
@@ -32,12 +35,12 @@ ie.
 
 Then enter  
 "git clone https://github.com/MarkJoyce0111/Triphasic"  
-5.  
+6.  
 Setup peripherals  
 type in  
 "sudo raspi-config"  
 Select Interface Options (3)  
 Then enable I2C   
-6.    
+7.    
 Run Code  
 "python3 TriphasicData_1.py"  
