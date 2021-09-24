@@ -10,7 +10,7 @@ The GUI is Tkinter based and the app is menu driven.
   
   
 MINIMUM SETUP! (Raspberry Pi (4 recomended) OS -> Rapbian) 
-               (ADS1115 ADC on I2C BUS, will throw error without)
+               (ADS1115 ADC on I2C BUS, will throw error without)   
 1.   
 Open a command line on the Raspberry Pi and paste or write in:  
 "pip3 install Adafruit-Blinka"  
