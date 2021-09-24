@@ -22,11 +22,11 @@ PIGPIO lib was already installed on Rasp
 if not  
 "pip3 install pigpio"  
 4.  
-Install matplotlib
+Install matplotlib   
 "pip install matplotlib"   
 5.   
 Then download this repository.  
-Create a folder to download into. 
+Create a folder to download into.  
 ie.  
 "mkdir githubDownload"  
 cd into it  
