@@ -59,6 +59,7 @@ class TriphasicApp(tk.Tk, Pump):
         self.__remaining_degrees = 1
         self.__occlusion = 0
         self.__gear_ratio = 1
+        self.__return_sensor = 27
         
 
         # the container is where we'll stack a bunch of frames
@@ -177,6 +178,9 @@ class TriphasicApp(tk.Tk, Pump):
     
     def get_gear_ratio(self):
         return self.__gear_ratio
+    
+    def get_return_sensor_gpio(self):
+        return self.__return_sensor
 
 ######################SETTERS########################
     
@@ -212,6 +216,9 @@ class TriphasicApp(tk.Tk, Pump):
         
     def set_gear_ratio(self, gear_ratio):
         self.__gear_ratio = gear_ratio
+        
+    def set_return_sensor_gpio(self, return_sensor):
+        self.__return_sensor = return_sensor
         
         
 class SplashScreen(tk.Frame):
@@ -546,10 +553,6 @@ class PumpOperation(tk.Frame):
         self.first_run = True
         
         # Pressure sensor variables
-        voltage_low_limit = 0.5 # Lowest valid voltage value @ 0 PSI
-        voltage_high_limit = 4.5 # Highest valid voltage value @ 5 PSI
-        pressure_range = 10 # 10 PSI Max reading range.
-        voltage_reading = 0.0
         pressure = 0.0
         
         # Create figure for plotting
@@ -872,7 +875,10 @@ class PumpOperation(tk.Frame):
         #Servo Instance
         self.throttle_valve = Occluder(self.servo_gpio, 600, 2300)
         #Pump instance
-        self.pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
+        #__init__(self, direction_pin, return_sensor, motor_pin, enable_pin, length, pulse_per_revolution,
+        #         length_per_revolution, tube_diameter, remaining_degrees, gear_ratio)
+        
+        self.pump = Pump(17, controller.get_return_sensor_gpio(),5,13,20,controller.get_pulse_per_revolution(),controller.get_length_per_revolution(),
                          controller.get_tube_diameter(), controller.get_remaining_degrees(), controller.get_gear_ratio())
         print('gear = ', controller.get_gear_ratio())
         #Set pump vars
@@ -1372,7 +1378,7 @@ class AutomateTests(tk.Frame):
         self.test_number = 1
         
         self.dataFilename = ''
-        self.first_run = False
+        self.first_run = True
         self.test_pump_exists = False
         
         #Exit Frame
@@ -1414,12 +1420,12 @@ class AutomateTests(tk.Frame):
         #Update GUI
         #Call get sensor data Multiprocess
         def get_sensor_data():
-            self.time_per_test = 1.5 #seconds
+            self.time_per_test = 3.8 #seconds
             test_number_label['text'] = "Test: " + str(self.test_number)
             self.remaining_tests = int(self.total_tests) - 1
             remaining_tests_label['text'] = "Remaining Tests: " + str(self.remaining_tests)
             self.total_time = (((self.total_tests * self.time_per_test) / 60) / 60 ) / 24
-            
+            print(self.total_time)
             if self.total_time < 1:
                 self.total_time = self.total_time * 24 #days to hours
                 if self.total_time < 1:
@@ -1428,14 +1434,19 @@ class AutomateTests(tk.Frame):
                     if self.total_time < 1:
                         self.total_time = self.total_time * 60 #minutes to seconds
                         #print("total seconds = ", self.total_time)
-                        remaining_time_label['text'] = "Remaining seconds: " + str(int(self.total_time))
-                    
+                        remaining_time_label['text'] = "Remaining seconds: " + str(round(self.total_time,2))
                     else:
                         #print("total minutes = ", self.total_time)
-                        remaining_time_label['text'] = "Remaining Minutes: " + str(round(self.total_time,2))
+                        minute = int(self.total_time)
+                        second = (self.total_time - minute) * 60
+                        #remaining_time_label['text'] = "Remaining Minutes: " + str(round(self.total_time,2))
+                        remaining_time_label['text'] = "Remaining Time: " + str(minute) + " minutes and " + str(int(second)) + " seconds"
                 else:
                     #print("total hours = ", self.total_time)
-                    remaining_time_label['text'] = "Remaining Hours: " + str(round(self.total_time,2))
+                    hours = int(self.total_time)
+                    minute = (self.total_time - hours) * 60
+                    #remaining_time_label['text'] = "Remaining Hours: " + str(round(self.total_time,2))
+                    remaining_time_label['text'] = "Remaining Time: " + str(hours) + " hours and " + str(int(minute)) + " minutes"
             else:
                 #print("total days = ", self.total_time)
                 remaining_time_label['text'] = "Remaining Days: " + str(round(self.total_time,2))
@@ -1475,13 +1486,29 @@ class AutomateTests(tk.Frame):
                                                 self.flow_ys[result],
                                                 self.throttle_val)
             
-        
+        def resetPumpPosition(theClass):
+            theClass.running = False 
+            theClass.return_initial_function()
+            theClass.move_initial_funct_done = False
+
+            while(theClass.move_initial_funct_done == False):
+                pass
+
+            time.sleep(1)
+            theClass.return_initial_function()
+            theClass.move_initial_funct_done = False
+            
+            while(theClass.move_initial_funct_done == False):
+                pass
+            time.sleep(1)
+            
+            
         def process1():   
             self.test_pump_exists = True
             self.servo_gpio = 12 # PIN 32 = GPIO 12
             
             #Create Pump instance
-            self.test_pump = Pump(17,22,5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
+            self.test_pump = Pump(17,controller.get_return_sensor_gpio(),5,13,20,controller.get_pulse_per_revolution(),self.controller.test_settings['length_per_rev'],
                              self.controller.test_settings['tube_diameter'], controller.get_remaining_degrees(), controller.get_gear_ratio())
             #Create Servo Instance
             self.throttle_valve = Occluder(self.servo_gpio,600,2300)
@@ -1537,7 +1564,7 @@ class AutomateTests(tk.Frame):
             self.test_pump.move_initial_funct_done = False
             while(self.test_pump.move_initial_funct_done == False):
                 pass
-            time.sleep(5)
+            time.sleep(2)
             #Start Pump - Thread!
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
             #Loop through test values
@@ -1566,18 +1593,38 @@ class AutomateTests(tk.Frame):
                             #time.sleep(0.5)
                             
                             for m in range(self.peak_percentage_min, self.peak_percentage_max + 10, 10):
+                                self.test_pump.peak_percentage_value = m
                                 current_peak_percentage_label['text'] = str(m)
                                 current_peak_percentage_label.config(text = str(m))
-                                self.test_pump.peak_percentage_value = m
-                                #Tell pump to change settings
+                                
+                                if self.first_run == True:
+                                    self.first_run = False
+                                    
+                                else:      
+                                    if int(k) == 20 and int(m) == 20:
+                                        feed_back_label['text'] = "Reset Position"
+                                        feed_back_label['fg'] = 'red'
+                                        self.test_pump.start_stop_function()
+                                        self.test_pump.condition_change = 1
+                                        time.sleep(2)
+                                        resetPumpPosition(self.test_pump)
+                                        time.sleep(1)
+                                        feed_back_label['text'] = "Running Tests"
+                                        feed_back_label['fg'] = 'green'
+                                        
+                                        self.test_pump.start_stop_function()
+                                        #Tell pump to change settings
                                 self.test_pump.condition_change = 1
                                 #Wait for pump to finish new settings computations.
                                 self.test_pump.i_made_new_data = False
                                 while self.test_pump.i_made_new_data == False: #Wait for pump to finish computations
                                     time.sleep(0.01) #Save porcessing power
+                                
                                 #Then get sensor data
                                 threading.Thread(target=get_sensor_data).start()  #Get sensor data  
                                 time.sleep(3) #ZzzzzZ
+                                                                                    
+                                
                        
             #Tests Complete: Stop Pump, Reset GUI.               
             threading.Thread(name='Pump_start_stop_function', target=self.test_pump.start_stop_function).start()
@@ -1588,6 +1635,7 @@ class AutomateTests(tk.Frame):
             process_button['state'] = 'normal'
             exit_button['state'] = 'normal'
             abort_button['state'] = 'disabled'
+            self.first_run = True
         
         # Abort Tests - Will cause exit
         def abort():
@@ -1653,7 +1701,7 @@ class AutomateTests(tk.Frame):
         remaining_tests_label.grid(row = self.remaining_test_row, column = 3, columnspan = 4, sticky = 'w')
         
         remaining_time_label = tk.Label(self, text="Remaining Time: ", font=self.data_font, fg = 'green')
-        remaining_time_label.grid(row = self.remaining_time_row, column = 3, columnspan = 4, sticky = 'w')
+        remaining_time_label.grid(row = self.remaining_time_row, column = 3, columnspan = 5, sticky = 'w')
         
         process_button = tk.Button(self, text="Process",
                            command=threadit)
@@ -1684,3 +1732,4 @@ class AutomateTests(tk.Frame):
 if __name__ == "__main__":
     app = TriphasicApp()
     app.mainloop()
+ 
