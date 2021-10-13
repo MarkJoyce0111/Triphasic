@@ -59,7 +59,7 @@ class TriphasicApp(tk.Tk, Pump):
         self.__remaining_degrees = 1
         self.__occlusion = 0
         self.__gear_ratio = 1
-        self.__return_sensor = 27
+        self.__return_sensor = 22
         
 
         # the container is where we'll stack a bunch of frames
