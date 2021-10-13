@@ -500,7 +500,7 @@ class CalPumpChamber(tk.Frame):
                                                     textvariable = self.remaining_degrees, justify = 'right',
                                                     font=self.spinner_font)
         remaining_degrees_spinbox.grid(row = 3, column = 3, rowspan = 1, sticky = 'nesw')
-        remaining_degrees_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 45, resolution = 1, showvalue = 0, bg = 'bisque2',
+        remaining_degrees_slider = tk.Scale(self, orient=tk.HORIZONTAL, from_ = 1, to = 60, resolution = 1, showvalue = 0, bg = 'bisque2',
                                                  length = 150, variable = self.remaining_degrees, sliderlength = 60, width = 60)
         remaining_degrees_slider.grid(row = 5, column = 3, rowspan = 1, columnspan = 1, sticky = 'nesw')
         remaining_degrees_slider.set(self.remaining_degrees_value)
